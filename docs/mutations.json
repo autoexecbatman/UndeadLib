@@ -1,0 +1,96 @@
+{
+  "cwd": "D:/repo/UndeadLib",
+  "test_command": ["C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/ctest.exe", "--test-dir", "build", "-C", "Release", "-R", "docs_generator"],
+  "mutations": [
+    {
+      "file": "docs/api_page.py",
+      "original": "        is_public = member.access_specifier == cindex.AccessSpecifier.PUBLIC",
+      "mutated": "        is_public = True",
+      "catches": "private members are listed"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "            if cursor.is_definition():\n                name = f\"{scope}{cursor.spelling}\"",
+      "mutated": "            if True:\n                name = f\"{scope}{cursor.spelling}\"",
+      "catches": "a forward declaration is listed as a class"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "        if not _is_in_file(cursor, header_key):\n            continue\n        kind = cursor.kind",
+      "mutated": "        kind = cursor.kind",
+      "catches": "declarations from included headers are listed"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "        if cursor.spelling == EXPORT_MACRO:",
+      "mutated": "        if False:",
+      "catches": "the export macro is listed as API"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "    return text.removeprefix(EXPORT_MACRO).lstrip()",
+      "mutated": "    return text.lstrip()",
+      "catches": "the C signature starts with the export macro"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "            if spelling in _TRAILING_QUALIFIERS:",
+      "mutated": "            if False:",
+      "catches": "const and noexcept are cut from a signature"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "    if not before.strip() or re.fullmatch(r\"\\s*(\\[\\[[^\\]]*\\]\\]\\s*)+\", before):",
+      "mutated": "    if not before.strip():",
+      "catches": "a leading [[nodiscard]] is cut from a signature"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "    entries.sort(key=lambda entry: entry.line)",
+      "mutated": "    pass",
+      "catches": "entries appear in walk order instead of reading order"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "        if source.overview is None:",
+      "mutated": "        if False:",
+      "catches": "a file with no opening block passes the gate"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "        if not (_is_public(statement.name) or statement.name == \"__init__\"):",
+      "mutated": "        if not _is_public(statement.name):",
+      "catches": "__init__ is left off the page"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "    if len(one_line) <= 79:",
+      "mutated": "    if len(one_line) <= 200:",
+      "catches": "a long def line is not broken"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "            \" \".join(written.split()) if \"=\" in written else constant.spelling",
+      "mutated": "            constant.spelling",
+      "catches": "an enum constant's explicit value is dropped"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "        f'<pre class=\"signature\"><code>{html.escape(entry.signature)}'",
+      "mutated": "        f'<pre class=\"signature\"><code>{entry.signature}'",
+      "catches": "a template's angle brackets reach the page unescaped"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "        if current is not None:",
+      "mutated": "        if False:",
+      "catches": "a tag's continuation line becomes prose"
+    },
+    {
+      "file": "docs/api_page.py",
+      "original": "                example = textwrap.dedent(\"\\n\".join(code)).strip(\"\\n\")",
+      "mutated": "                example = \"\\n\".join(code).strip(\"\\n\")",
+      "catches": "a code example keeps the comment's indentation"
+    }
+  ]
+}

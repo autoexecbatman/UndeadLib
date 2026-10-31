@@ -79,13 +79,18 @@ extern "C"
 	 * cell, or UNDEAD_UNREACHED where none reaches. A source is at distance 0
 	 * whatever its own cost.
 	 *
-	 * width, height: the grid's size in cells.
-	 * step_costs: width * height entries, read only; 0 is a wall, 1 to 255
-	 * the cost of stepping onto the cell. NULL only when width * height is 0.
-	 * connectivity: UNDEAD_FOUR_WAY or UNDEAD_EIGHT_WAY.
-	 * sources: source_count cell indices; NULL only when source_count is 0.
-	 * distances: width * height entries, written only on UNDEAD_OK; NULL only
-	 * when width * height is 0.
+	 * @param[in] width Cells per row.
+	 * @param[in] height Rows.
+	 * @param[in] step_costs width * height entries, read only; 0 is a wall,
+	 * 1 to 255 the cost of stepping onto the cell. NULL only when
+	 * width * height is 0.
+	 * @param[in] connectivity UNDEAD_FOUR_WAY or UNDEAD_EIGHT_WAY.
+	 * @param[in] sources source_count cell indices. NULL only when
+	 * source_count is 0.
+	 * @param[in] source_count How many sources there are.
+	 * @param[out] distances width * height entries, written only on
+	 * UNDEAD_OK. NULL only when width * height is 0.
+	 * @returns UNDEAD_OK, or the UNDEAD_ERROR_ code naming the refusal.
 	 */
 	UNDEAD_API int undead_dijkstra_map(
 		size_t width,

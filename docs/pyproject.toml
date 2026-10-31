@@ -1,0 +1,24 @@
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+# preview is what makes PLW1514 run at all; without it the selection is inert.
+preview = true
+select = ["PLW1514", "E", "W", "D", "I", "N", "UP"]
+# Each contradicts another enabled docstring rule.
+ignore = ["D203", "D213"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+files = ["api_page.py", "tests"]
+mypy_path = "."
+
+# libclang's bindings ship no type information.
+[[tool.mypy.overrides]]
+module = ["clang", "clang.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

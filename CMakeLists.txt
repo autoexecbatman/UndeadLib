@@ -42,15 +42,44 @@ target_include_directories(undead_c PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_definitions(undead_c PRIVATE UNDEAD_BUILDING_DLL)
 undead_strict_warnings(undead_c)
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+# The API documentation: build/docs/api.html, from the headers and the Python
+# binding. It fails when a public declaration has no comment.
+add_custom_target(docs
+	COMMAND ${Python3_EXECUTABLE} -X utf8
+		${CMAKE_CURRENT_SOURCE_DIR}/docs/api_page.py
+		--root ${CMAKE_CURRENT_SOURCE_DIR}
+		--out ${CMAKE_BINARY_DIR}/docs/api.html
+	COMMENT "Writing ${CMAKE_BINARY_DIR}/docs/api.html"
+	VERBATIM
+)
+
 option(UNDEAD_BUILD_TESTS "Build the UndeadLib test executable" ON)
 if(UNDEAD_BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(tests)
 
+	# Plugin autoload is off for every pytest suite: none needs a plugin, and
+	# a broken third-party one then cannot stop a suite loading.
+
+	# The documentation generator's own tests, and its coverage gate.
+	add_test(
+		NAME docs_generator
+		COMMAND ${Python3_EXECUTABLE} -m pytest -q -p no:cacheprovider
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs
+	)
+	set_tests_properties(docs_generator PROPERTIES
+		ENVIRONMENT "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1"
+	)
+	add_test(
+		NAME docs_coverage
+		COMMAND ${Python3_EXECUTABLE} -X utf8
+			${CMAKE_CURRENT_SOURCE_DIR}/docs/api_page.py
+			--root ${CMAKE_CURRENT_SOURCE_DIR} --check
+	)
+
 	# The Python binding's suite, against the undead_c this build produced.
-	# Plugin autoload is off: the suite needs none, and a broken third-party
-	# plugin then cannot stop it loading.
-	find_package(Python3 REQUIRED COMPONENTS Interpreter)
 	add_test(
 		NAME python_binding
 		COMMAND ${Python3_EXECUTABLE} -m pytest -q -p no:cacheprovider

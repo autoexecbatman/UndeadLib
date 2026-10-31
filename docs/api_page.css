@@ -1,0 +1,228 @@
+/*------------------------------------*\
+  #API-PAGE
+\*------------------------------------*/
+
+/*
+ * The stylesheet api_page.py inlines into build/docs/api.html. It expects
+ * the markup render_page writes: nav#sidebar holding input#filter and
+ * per-file ul lists, then main holding section > article.file > div.entry.
+ * Elements with [data-name] are what api_page.js hides while filtering.
+ */
+
+:root {
+	--background: #fbfaf7;
+	--surface: #ffffff;
+	--text: #1d1d1f;
+	--muted: #6b6b70;
+	--border: #e3e1dc;
+	--accent: #7a3e9d;
+	--code-background: #f3f1ec;
+	--missing: #b3261e;
+	--sidebar-width: 19rem;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--background: #151518;
+		--surface: #1d1d21;
+		--text: #e8e6e3;
+		--muted: #9a98a0;
+		--border: #2e2e34;
+		--accent: #c79be0;
+		--code-background: #26262c;
+		--missing: #f2b8b5;
+	}
+}
+
+* {
+	box-sizing: border-box;
+}
+
+[hidden] {
+	display: none !important;
+}
+
+body {
+	margin: 0;
+	background: var(--background);
+	color: var(--text);
+	font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Ligatures off: a reader copying an example sees "->", not an arrow. */
+code,
+pre,
+#sidebar li {
+	font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
+	font-variant-ligatures: none;
+	font-feature-settings: "calt" 0, "liga" 0;
+}
+
+code,
+pre {
+	font-size: 13px;
+}
+
+a {
+	color: var(--accent);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+/*------------------------------------*\
+  #SIDEBAR
+\*------------------------------------*/
+
+#sidebar {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: var(--sidebar-width);
+	overflow-y: auto;
+	padding: 1rem;
+	background: var(--surface);
+	border-right: 1px solid var(--border);
+}
+
+#filter {
+	width: 100%;
+	padding: 0.45rem 0.6rem;
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	background: var(--background);
+	color: var(--text);
+	font: inherit;
+}
+
+#sidebar h2 {
+	margin: 1.2rem 0 0.3rem;
+	color: var(--muted);
+	font-size: 0.75rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+#sidebar h3 {
+	margin: 0.6rem 0 0.2rem;
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+#sidebar ul {
+	margin: 0;
+	padding: 0 0 0 0.6rem;
+	list-style: none;
+}
+
+/* One line per entry, cut with an ellipsis; the link's title holds it all. */
+#sidebar li {
+	overflow: hidden;
+	font-size: 12.5px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/*------------------------------------*\
+  #CONTENT
+\*------------------------------------*/
+
+main {
+	max-width: 58rem;
+	margin-left: var(--sidebar-width);
+	padding: 1.5rem 2.5rem 4rem;
+}
+
+h1 {
+	margin-top: 0;
+}
+
+.section-title {
+	margin-top: 2.5rem;
+	padding-bottom: 0.3rem;
+	border-bottom: 2px solid var(--accent);
+}
+
+.file h3 {
+	margin: 2rem 0 0.5rem;
+	font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
+}
+
+.entry {
+	margin: 1rem 0;
+	padding: 0.8rem 1rem;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	scroll-margin-top: 1rem;
+}
+
+.entry h4 {
+	margin: 0 0 0.4rem;
+	font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
+	font-size: 0.95rem;
+	overflow-wrap: anywhere;
+}
+
+.entry:target {
+	border-color: var(--accent);
+}
+
+.kind {
+	margin-left: 0.4rem;
+	color: var(--muted);
+	font-family: system-ui, sans-serif;
+	font-size: 0.75rem;
+	font-weight: 400;
+}
+
+pre {
+	margin: 0.5rem 0;
+	padding: 0.6rem 0.8rem;
+	overflow-x: auto;
+	background: var(--code-background);
+	border-radius: 6px;
+}
+
+h5 {
+	margin: 0.8rem 0 0.2rem;
+	color: var(--muted);
+	font-size: 0.75rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+dl {
+	margin: 0;
+}
+
+dt {
+	margin-top: 0.3rem;
+}
+
+dd {
+	margin: 0 0 0 1.2rem;
+}
+
+.missing {
+	color: var(--missing);
+	font-weight: 600;
+}
+
+@media (max-width: 52rem) {
+	#sidebar {
+		position: static;
+		width: auto;
+		max-height: 40vh;
+		border-right: none;
+		border-bottom: 1px solid var(--border);
+	}
+
+	main {
+		margin-left: 0;
+		padding: 1rem;
+	}
+}
