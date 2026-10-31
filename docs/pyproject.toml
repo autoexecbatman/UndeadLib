@@ -11,7 +11,14 @@ ignore = ["D203", "D213"]
 [tool.mypy]
 python_version = "3.13"
 strict = true
-files = ["api_page.py", "api_model.py", "api_page_js.py", "tests"]
+files = [
+    "api_page.py",
+    "api_model.py",
+    "api_text.py",
+    "api_page_js.py",
+    "api_page_cs.py",
+    "tests",
+]
 mypy_path = "."
 
 # libclang's bindings ship no type information.

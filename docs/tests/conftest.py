@@ -87,7 +87,7 @@ def all_files() -> list[SourceFile]:
     """Return everything collect_all finds under the repository root.
 
     Example:
-        all_files[-1].path  # -> 'bindings/js/undead.mjs'
+        all_files[-1].path  # -> 'bindings/csharp/Undead/UndeadLibrary.cs'
 
     """
     return api_page.collect_all(ROOT)

@@ -1,6 +1,11 @@
 {
   "cwd": "D:/repo/UndeadLib/docs",
-  "test_command": ["powershell", "-NoProfile", "-Command", "$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'; python -m pytest -q -p no:cacheprovider tests/test_api_page_js.py; exit $LASTEXITCODE"],
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'; python -m pytest -q -p no:cacheprovider tests/test_api_page_js.py; exit $LASTEXITCODE"
+  ],
   "mutations": [
     {
       "file": "api_page_js.py",
@@ -51,37 +56,37 @@
       "catches": "a return type is lost"
     },
     {
-      "file": "api_page_js.py",
+      "file": "api_text.py",
       "original": "            end = len(text) if end == -1 else end\n            blank(index, end)",
       "mutated": "            end = len(text) if end == -1 else end",
       "catches": "a brace in a line comment counts"
     },
     {
-      "file": "api_page_js.py",
-      "original": "                comments.append(_Comment(body, line))\n            blank(index, end)",
-      "mutated": "                comments.append(_Comment(body, line))",
+      "file": "api_text.py",
+      "original": "                comments.append(Comment(body, line))\n            blank(index, end)",
+      "mutated": "                comments.append(Comment(body, line))",
       "catches": "a brace in a block comment counts"
     },
     {
-      "file": "api_page_js.py",
+      "file": "api_text.py",
       "original": "            blank(index + 1, end)",
       "mutated": "            blank(index, index)",
       "catches": "a brace in a string counts"
     },
     {
-      "file": "api_page_js.py",
+      "file": "api_text.py",
       "original": "                end += 2 if text[end] == \"\\\\\" else 1",
       "mutated": "                end += 1",
       "catches": "an escaped quote ends the string"
     },
     {
-      "file": "api_page_js.py",
+      "file": "api_text.py",
       "original": "            line += body.count(\"\\n\")",
       "mutated": "            line += 0",
       "catches": "a comment is attached by its first line, not its last"
     },
     {
-      "file": "api_page_js.py",
+      "file": "api_text.py",
       "original": "            joined = joined.replace(\"( \", \"(\").replace(\", )\", \")\")",
       "mutated": "            joined = joined.replace(\"( \", \"(\")",
       "catches": "a multi-line signature keeps its trailing comma"

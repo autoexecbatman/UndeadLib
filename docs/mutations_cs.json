@@ -1,0 +1,126 @@
+{
+  "cwd": "D:/repo/UndeadLib/docs",
+  "test_command": ["powershell", "-NoProfile", "-Command", "$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'; python -m pytest -q -p no:cacheprovider tests/test_api_page_cs.py; exit $LASTEXITCODE"],
+  "mutations": [
+    {
+      "file": "api_page_cs.py",
+      "original": "        return child.get(\"cref\") or child.get(\"langword\") or \"\"",
+      "mutated": "        return \"\"",
+      "catches": "see loses the name it points at"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "        return child.get(\"name\", \"\")",
+      "mutated": "        return \"\"",
+      "catches": "paramref loses the parameter's name"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "    raise ValueError(f\"unknown XML doc tag <{child.tag}>\")",
+      "mutated": "    return \"\"",
+      "catches": "an unknown inline tag is dropped"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "            raise ValueError(f\"unknown XML doc tag <{element.tag}>\")",
+      "mutated": "            pass",
+      "catches": "an unknown top-level tag is dropped"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "            code = textwrap.dedent(child.text or \"\").strip(\"\\n\")",
+      "mutated": "            code = (child.text or \"\").strip(\"\\n\")",
+      "catches": "an example keeps its indentation"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "            item = Field(element.get(\"cref\", \"\"), _inline_text(element))",
+      "mutated": "            item = Field(\"\", _inline_text(element))",
+      "catches": "an exception loses its type"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "            if match and match.group(1) == \"enum\" and \"}\" in code:",
+      "mutated": "            if False:",
+      "catches": "a one-line enum is listed with no values"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "            if match and code.startswith(\"public\"):",
+      "mutated": "            if match:",
+      "catches": "non-public types are listed"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "                raise ValueError(f\"{where}: unrecognised declaration: {code}\")",
+      "mutated": "                pass",
+      "catches": "a public top-level form the reader does not know is skipped"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "                raise ValueError(f\"{where}: only file-scoped namespaces\")",
+      "mutated": "                pass",
+      "catches": "a block-scoped namespace shifts every depth by one, silently"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "        raise ValueError(f\"{where}: nested types are not read: {code}\")",
+      "mutated": "        pass",
+      "catches": "a nested type is listed as a member"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "        kind = \"constructor\" if name == type_name else \"method\"",
+      "mutated": "        kind = \"method\"",
+      "catches": "a constructor is labelled a method"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "        kind = \"field\" if first == \";\" else \"property\"",
+      "mutated": "        kind = \"property\"",
+      "catches": "a field is labelled a property"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "_MEMBER_TERMINATORS = (\"{\", \"=>\", \";\")",
+      "mutated": "_MEMBER_TERMINATORS = (\"{\", \";\")",
+      "catches": "an expression body runs into the signature"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "            type_entry.members.append(_enum_member(lines, masked, index))",
+      "mutated": "            pass",
+      "catches": "an enum's values are lost"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "        if depth_before == 0:\n            type_entry = None",
+      "mutated": "        if depth_before == 0:\n            pass",
+      "catches": "members after a public type go to it even under an internal type"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "        if not stripped.startswith(\"//\") or stripped.startswith(\"///\"):",
+      "mutated": "        if not stripped.startswith(\"//\"):",
+      "catches": "a type's XML comment at the top of the file is taken as the overview"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "    if len(head) <= 79:",
+      "mutated": "    if True:",
+      "catches": "a long signature stays on one line"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "        elif character == \",\" and depth == 0:",
+      "mutated": "        elif character == \",\":",
+      "catches": "a comma inside a generic splits a parameter"
+    },
+    {
+      "file": "api_page_cs.py",
+      "original": "    while start > 0 and lines[start - 1].strip().startswith(\"///\"):",
+      "mutated": "    while start > 1 and lines[start - 1].strip().startswith(\"///\"):",
+      "catches": "a comment on the file's first line is not read"
+    }
+  ]
+}

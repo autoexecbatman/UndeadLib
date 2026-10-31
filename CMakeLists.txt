@@ -104,4 +104,20 @@ if(UNDEAD_BUILD_TESTS)
 	set_tests_properties(python_binding PROPERTIES
 		ENVIRONMENT "UNDEAD_C_DLL=$<TARGET_FILE:undead_c>;PYTEST_DISABLE_PLUGIN_AUTOLOAD=1"
 	)
+
+	# The C# binding's suite against the same undead_c, and its format gate.
+	find_program(UNDEAD_DOTNET dotnet REQUIRED)
+	add_test(
+		NAME csharp_binding
+		COMMAND ${UNDEAD_DOTNET} test Undead.Tests -c Release
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bindings/csharp
+	)
+	set_tests_properties(csharp_binding PROPERTIES
+		ENVIRONMENT "UNDEAD_C_DLL=$<TARGET_FILE:undead_c>"
+	)
+	add_test(
+		NAME csharp_format
+		COMMAND ${UNDEAD_DOTNET} format Undead.Tests/Undead.Tests.csproj --verify-no-changes
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bindings/csharp
+	)
 endif()

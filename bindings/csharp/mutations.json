@@ -1,0 +1,102 @@
+{
+  "cwd": "D:/repo/UndeadLib",
+  "test_command": ["C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/ctest.exe", "--test-dir", "build", "-C", "Release", "-R", "csharp_binding"],
+  "mutations": [
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\tArgumentOutOfRangeException.ThrowIfNegative(width);\n",
+      "mutated": "",
+      "catches": "a negative width reaches C as a huge size_t"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\tArgumentOutOfRangeException.ThrowIfNegative(height);\n",
+      "mutated": "",
+      "catches": "a negative height reaches C as a huge size_t"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\tlong cellCount = (long)width * height;",
+      "mutated": "\t\tlong cellCount = width * height;",
+      "catches": "the cell count wraps in int and matches empty costs"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\tif (stepCosts.Length != cellCount)",
+      "mutated": "\t\tif (stepCosts.Length < cellCount)",
+      "catches": "costs longer than the grid are accepted"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\tif (stepCosts.Length != cellCount)",
+      "mutated": "\t\tif (stepCosts.Length > cellCount)",
+      "catches": "costs shorter than the grid are accepted and C reads past them"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\t\tif (sources[index] < 0)",
+      "mutated": "\t\t\tif (sources[index] < -1)",
+      "catches": "a negative source reaches C and is refused there, as a different error"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\tObjectDisposedException.ThrowIf(isDisposed, this);",
+      "mutated": "",
+      "catches": "a call after Dispose reaches an unloaded DLL"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\tif (status != 0)",
+      "mutated": "\t\tif (status > 3)",
+      "catches": "low non-zero statuses are read as success"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\t\"UNDEAD_OK\",\n",
+      "mutated": "",
+      "catches": "status names are shifted one code off"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\treturn distance == Unreached ? null : distance;",
+      "mutated": "\t\treturn distance;",
+      "catches": "unreached cells come back as 4294967295, not null"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\t\t3 => new ArgumentOutOfRangeException(null, message),",
+      "mutated": "\t\t\t3 => new ArgumentException(message),",
+      "catches": "a source outside the grid is the wrong exception type"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\t\t5 => new OverflowException(message),",
+      "mutated": "\t\t\t5 => new InvalidOperationException(message),",
+      "catches": "an overflow is reported as a defect"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\t\t6 => new InsufficientMemoryException(message),",
+      "mutated": "\t\t\t6 => new InvalidOperationException(message),",
+      "catches": "out of memory is reported as a defect"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\tisDisposed = true;\n\t\tNativeLibrary.Free(libraryHandle);",
+      "mutated": "\t\tisDisposed = true;",
+      "catches": "Dispose leaves the DLL loaded"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\t\tNativeLibrary.Free(libraryHandle);\n\t\t\tthrow;",
+      "mutated": "\t\t\tthrow;",
+      "catches": "a DLL without the export stays loaded"
+    },
+    {
+      "file": "bindings/csharp/Undead/UndeadLibrary.cs",
+      "original": "\t\t\t\t(int)connectivity,",
+      "mutated": "\t\t\t\t(int)Connectivity.EightWay,",
+      "catches": "the connectivity argument is ignored"
+    }
+  ]
+}

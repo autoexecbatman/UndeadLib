@@ -1,0 +1,2 @@
+# LF on every checkout, whatever core.autocrlf says, so dotnet format sees the endings .editorconfig names.
+*.cs text eol=lf

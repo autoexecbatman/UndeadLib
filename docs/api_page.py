@@ -1,7 +1,8 @@
 """Render UndeadLib's public API into one self-contained HTML page.
 
-Headers are read with libclang, the Python binding with ast, and the
-JavaScript binding by api_page_js; nothing is imported or executed. The
+Headers are read with libclang, the Python binding with ast, the
+JavaScript binding by api_page_js and the C# binding by api_page_cs;
+nothing is imported or executed. The
 page is also a coverage gate: a listed declaration with no comment, or a
 file with no opening block, fails the run.
 
@@ -32,6 +33,7 @@ from pathlib import Path
 
 import clang.cindex as cindex
 
+import api_page_cs
 import api_page_js
 from api_model import (
     DocBlock,
@@ -889,12 +891,13 @@ def undocumented(files: list[SourceFile]) -> list[str]:
 
 
 def collect_all(root: Path) -> list[SourceFile]:
-    """Collect the C API, the C++ core and both bindings under root.
+    """Collect the C API, the C++ core and the three bindings under root.
 
     Example:
         [source.path for source in collect_all(root)]
         # -> ['include/undead/undead.h', 'include/undead/DialSearch.h', ...,
-        #     'bindings/python/undead/__init__.py', 'bindings/js/undead.mjs']
+        #     'bindings/python/undead/__init__.py', 'bindings/js/undead.mjs',
+        #     'bindings/csharp/Undead/Connectivity.cs', ...]
 
     """
     include = root / "include" / "undead"
@@ -907,6 +910,9 @@ def collect_all(root: Path) -> list[SourceFile]:
     files.append(collect_python_module(binding, root))
     js_binding = root / "bindings" / "js" / "undead.mjs"
     files.append(api_page_js.collect_js_module(js_binding, root))
+    cs_binding = root / "bindings" / "csharp" / "Undead"
+    for cs_file in sorted(cs_binding.glob("*.cs")):
+        files.append(api_page_cs.collect_cs_file(cs_file, root))
     return files
 
 
@@ -1051,6 +1057,7 @@ def render_page(files: list[SourceFile], style: str, script: str) -> str:
         CPP_SECTION,
         PYTHON_SECTION,
         api_page_js.JS_SECTION,
+        api_page_cs.CS_SECTION,
     ]
     body = [_render_sidebar(files, sections), "<main><h1>UndeadLib API</h1>"]
     for section in sections:

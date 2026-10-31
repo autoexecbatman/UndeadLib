@@ -1,7 +1,7 @@
 """Read an ES module's exports and their JSDoc comments for the API page.
 
-The module is read as text, never run. Comments, strings and template
-literals are masked out first, so braces inside them do not move the depth
+The module is read as text, never run: api_text masks comments, strings
+and template literals first, so braces inside them do not move the depth
 that decides what is top level and what is a class member. Regex literals
 are not masked; a regex holding a quote, a brace or a comment opener can
 mislead the reader.
@@ -39,6 +39,7 @@ from api_model import (
     add_field,
     comment_lines,
 )
+from api_text import mask_source, signature_head
 
 JS_SECTION = "JavaScript binding"
 
@@ -57,14 +58,6 @@ _FIELD = re.compile(rf"^(?:static\s+)?(#?{_NAME})\s*(?:=|;)")
 
 
 @dataclass
-class _Comment:
-    """A /** */ block: its text and the line it ends on, counted from 1."""
-
-    raw: str
-    end_line: int
-
-
-@dataclass
 class _Declaration:
     """A declaration read from one line, and the last line its head spans."""
 
@@ -72,14 +65,6 @@ class _Declaration:
     kind: str
     signature: str
     last_line: int
-
-
-@dataclass
-class _Masked:
-    """A module's lines with comments and string contents blanked out."""
-
-    lines: list[str]
-    comments: list[_Comment]
 
 
 def _split_type(text: str) -> tuple[str, str]:
@@ -199,96 +184,6 @@ def parse_jsdoc_comment(raw: str) -> DocBlock:
     return DocBlock(parts)
 
 
-def _mask(text: str) -> _Masked:
-    r"""Blank out comments and string contents, keeping every line's length.
-
-    Example:
-        _mask('a = "{"; /** B. */\n').lines
-        # -> ['a = " ";          ']
-        _mask('/** B. */\nx;\n').comments[0].end_line  # -> 1
-
-    Raises:
-        ValueError: On a comment or string that never closes.
-
-    """
-    masked = list(text)
-    comments: list[_Comment] = []
-    index = 0
-    line = 1
-
-    # Blank text[start:end], keeping newlines so lines stay aligned.
-    def blank(start: int, end: int) -> None:
-        for position in range(start, end):
-            if masked[position] != "\n":
-                masked[position] = " "
-
-    while index < len(text):
-        character = text[index]
-        pair = text[index : index + 2]
-        if character == "\n":
-            line += 1
-            index += 1
-        elif pair == "//":
-            end = text.find("\n", index)
-            end = len(text) if end == -1 else end
-            blank(index, end)
-            index = end
-        elif pair == "/*":
-            end = text.find("*/", index + 2)
-            if end == -1:
-                raise ValueError(f"line {line}: unclosed comment")
-            end += 2
-            body = text[index:end]
-            line += body.count("\n")
-            # A JSDoc block opens with /**; /**/ is an empty plain comment.
-            if body.startswith("/**") and body != "/**/":
-                comments.append(_Comment(body, line))
-            blank(index, end)
-            index = end
-        elif character in "\"'`":
-            end = index + 1
-            while end < len(text) and text[end] != character:
-                # A backslash escapes whatever follows it, a quote included.
-                end += 2 if text[end] == "\\" else 1
-            if end >= len(text):
-                raise ValueError(f"line {line}: unclosed string")
-            line += text.count("\n", index, end)
-            # The quotes stay; everything between them is blanked.
-            blank(index + 1, end)
-            index = end + 1
-        else:
-            index += 1
-    return _Masked("".join(masked).splitlines(), comments)
-
-
-def _signature(
-    lines: list[str], masked: list[str], start: int
-) -> tuple[str, int]:
-    r"""Join lines from start up to the body's opening brace into one line.
-
-    Returns the signature and the index of the line holding the brace.
-
-    Example:
-        _signature(["f(", "\ta,", ") {"], ["f(", "\ta,", ") {"], 0)
-        # -> ('f(a)', 2)
-
-    Raises:
-        ValueError: If no brace opens a body before the end of the file.
-
-    """
-    pieces = []
-    for index in range(start, len(lines)):
-        brace = masked[index].find("{")
-        if brace != -1:
-            pieces.append(lines[index][:brace])
-            joined = re.sub(r"\s+", " ", " ".join(pieces)).strip()
-            # Parameters on their own lines leave a space and a trailing comma.
-            joined = joined.replace("( ", "(").replace(", )", ")")
-            return joined.replace(" )", ")"), index
-        pieces.append(lines[index])
-    raise ValueError(f"line {start + 1}: no body follows this declaration")
-
-
 def _export_declaration(
     lines: list[str], masked: list[str], index: int, where: str
 ) -> _Declaration:
@@ -325,7 +220,7 @@ def _export_declaration(
     ):
         match = pattern.match(code)
         if match:
-            signature, last_line = _signature(lines, masked, index)
+            signature, last_line = signature_head(lines, masked, index, ("{",))
             return _Declaration(match.group(1), kind, signature, last_line)
     raise ValueError(f"{where}: unrecognised export form: {code}")
 
@@ -350,7 +245,7 @@ def _member_declaration(
     method_match = _METHOD.match(code)
     if method_match:
         name = method_match.group(2)
-        signature, last_line = _signature(lines, masked, index)
+        signature, last_line = signature_head(lines, masked, index, ("{",))
         if name == "constructor":
             kind = "constructor"
         elif method_match.group(1):
@@ -382,7 +277,7 @@ def collect_js_module(module: Path, root: Path) -> SourceFile:
     path = module.relative_to(root).as_posix()
     text = module.read_text(encoding="utf-8")
     lines = text.splitlines()
-    masked = _mask(text)
+    masked = mask_source(text)
     docs = {comment.end_line: comment.raw for comment in masked.comments}
 
     # The comment ending on the line directly above a declaration is its doc.

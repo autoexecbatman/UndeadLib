@@ -1,0 +1,29 @@
+# The C# binding's format, checked by: dotnet format --verify-no-changes
+root = true
+
+[*.cs]
+indent_style = tab
+indent_size = 4
+# LF; .gitattributes keeps it LF on checkout, where core.autocrlf would make it CRLF.
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+
+# Allman braces, as in the C++ core.
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# Braces on every if, for, foreach and while body.
+csharp_prefer_braces = true:error
+
+# Imports are explicit and System namespaces come first.
+dotnet_sort_system_directives_first = true
+csharp_using_directive_placement = outside_namespace:error
+
+# File-scoped namespaces.
+csharp_style_namespace_declarations = file_scoped:error
+
+[*.{csproj,props}]
+indent_style = tab

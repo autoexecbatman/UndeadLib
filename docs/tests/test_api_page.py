@@ -423,6 +423,8 @@ def test_the_real_tree_is_fully_documented(
         "include/undead/GridGraph.h",
         "bindings/python/undead/__init__.py",
         "bindings/js/undead.mjs",
+        "bindings/csharp/Undead/Connectivity.cs",
+        "bindings/csharp/Undead/UndeadLibrary.cs",
     ]
     assert api_page.undocumented(files) == []
 

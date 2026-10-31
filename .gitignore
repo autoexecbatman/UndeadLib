@@ -3,6 +3,10 @@ build/
 build-wasm/
 vcpkg_installed/
 
+# .NET build output
+bindings/csharp/*/bin/
+bindings/csharp/*/obj/
+
 # Python caches
 __pycache__/
 .mypy_cache/

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<!-- The binding: undead_c.dll called through an unmanaged function pointer. -->
+	<PropertyGroup>
+		<RootNamespace>Undead</RootNamespace>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<!-- A public member without an XML comment is CS1591, an error here. -->
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- The suite tests the status table directly, statuses no call can reach included. -->
+		<InternalsVisibleTo Include="Undead.Tests" />
+	</ItemGroup>
+</Project>
