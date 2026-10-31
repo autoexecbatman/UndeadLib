@@ -1,0 +1,162 @@
+{
+  "cwd": "D:/repo/UndeadLib",
+  "test_command": ["powershell", "-NoProfile", "-File", "tests/run_suite.ps1", "Debug", "*-*Uint32Max*:*DistanceOverflow*"],
+  "mutations": [
+    {
+      "file": "include/undead/DialSearch.h",
+      "original": "if (source >= nodeCount)",
+      "mutated": "if (source > nodeCount)",
+      "catches": "a source equal to the node count is accepted"
+    },
+    {
+      "file": "include/undead/DialSearch.h",
+      "original": "if (next >= nodeCount)",
+      "mutated": "if (next > nodeCount)",
+      "catches": "a neighbour one past the last node is accepted"
+    },
+    {
+      "file": "include/undead/DialSearch.h",
+      "original": "if (stepCost > maxStepCost)",
+      "mutated": "if (stepCost >= maxStepCost)",
+      "catches": "a step cost equal to the bound is refused"
+    },
+    {
+      "file": "include/undead/DialSearch.h",
+      "original": "const uint64_t candidate = current + stepCost;",
+      "mutated": "const uint64_t candidate = current + 1;",
+      "catches": "step costs are ignored and every edge costs 1"
+    },
+    {
+      "file": "include/undead/DialSearch.h",
+      "original": "const size_t slot = currentSlot + stepCost;",
+      "mutated": "const size_t slot = currentSlot + stepCost + 1;",
+      "catches": "a relaxed node is filed one bucket too late"
+    },
+    {
+      "file": "include/undead/DialSearch.h",
+      "original": "buckets[slot >= bucketCount ? slot - bucketCount : slot]",
+      "mutated": "buckets[slot > bucketCount ? slot - bucketCount : slot]",
+      "catches": "a slot exactly at the ring size is not wrapped"
+    },
+    {
+      "file": "include/undead/DialSearch.h",
+      "original": "currentSlot + 1 == bucketCount ? 0 : currentSlot + 1;",
+      "mutated": "currentSlot + 2 >= bucketCount ? 0 : currentSlot + 1;",
+      "catches": "the ring wraps one bucket early and skips the last bucket"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "if (cell_count(width, height) != cellStepCosts.size())",
+      "mutated": "if (cell_count(width, height) > cellStepCosts.size())",
+      "catches": "a cost array longer than the grid is accepted"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "width > std::numeric_limits<size_t>::max() / height)",
+      "mutated": "width > std::numeric_limits<size_t>::max())",
+      "catches": "width * height wraps and the wrapped product is used"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "const bool hasSouth = row + 1 < rowCount;",
+      "mutated": "const bool hasSouth = row < rowCount;",
+      "catches": "the bottom row offers a neighbour below the grid"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "const bool hasWest = column > 0;",
+      "mutated": "const bool hasWest = column > 0 || row > 0;",
+      "catches": "the west edge wraps onto the end of the previous row"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "const bool hasEast = column + 1 < columnCount;",
+      "mutated": "const bool hasEast = column < columnCount;",
+      "catches": "the east edge wraps onto the start of the next row"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "if (stepCost != 0)",
+      "mutated": "if (stepCost != 1)",
+      "catches": "walls are entered and cost-1 cells are skipped"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "if (connectivity == Connectivity::FOUR)",
+      "mutated": "if (connectivity != Connectivity::FOUR)",
+      "catches": "four-way and eight-way are swapped"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "offer(node - columnCount - 1);",
+      "mutated": "offer(node - 1);",
+      "catches": "the north-west diagonal is replaced by west"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "offer(node - columnCount + 1);",
+      "mutated": "offer(node - columnCount);",
+      "catches": "the north-east diagonal is replaced by north"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "offer(node + columnCount - 1);",
+      "mutated": "offer(node + columnCount + 1);",
+      "catches": "the south-west diagonal is replaced by south-east"
+    },
+    {
+      "file": "include/undead/GridGraph.h",
+      "original": "offer(node + 1);",
+      "mutated": "(void)0;",
+      "catches": "east is never offered"
+    },
+    {
+      "file": "include/undead/DistanceMap.h",
+      "original": "if (node >= distances.size())",
+      "mutated": "if (node > distances.size())",
+      "catches": "distance(node_count()) reads past the end"
+    },
+    {
+      "file": "include/undead/DistanceMap.h",
+      "original": "if (distances[node] == UNREACHED)",
+      "mutated": "if (distances[node] == 0)",
+      "catches": "an unreached node reads as UINT32_MAX and a source as unreached"
+    },
+    {
+      "file": "src/undead_c.cpp",
+      "original": "(sources == nullptr && source_count != 0)",
+      "mutated": "(sources == nullptr && source_count > 1)",
+      "catches": "a NULL source array with one source is dereferenced"
+    },
+    {
+      "file": "src/undead_c.cpp",
+      "original": "(grid->step_costs == nullptr || distances == nullptr)",
+      "mutated": "(distances == nullptr)",
+      "catches": "a NULL cost array on a non-empty grid is read"
+    },
+    {
+      "file": "src/undead_c.cpp",
+      "original": "if (*cellCount != 0 &&",
+      "mutated": "if (*cellCount != 1 &&",
+      "catches": "an empty grid with NULL arrays is refused"
+    },
+    {
+      "file": "src/undead_c.cpp",
+      "original": "if (connectivity != UNDEAD_FOUR_WAY && connectivity != UNDEAD_EIGHT_WAY)",
+      "mutated": "if (connectivity != UNDEAD_FOUR_WAY)",
+      "catches": "eight-way is refused"
+    },
+    {
+      "file": "src/undead_c.cpp",
+      "original": "return UNDEAD_ERROR_SOURCE_OUT_OF_RANGE;",
+      "mutated": "return UNDEAD_ERROR_INTERNAL;",
+      "catches": "a bad source reports as a library defect"
+    },
+    {
+      "file": "src/undead_c.cpp",
+      "original": "value_or(UNDEAD_UNREACHED)",
+      "mutated": "value_or(0)",
+      "catches": "an unreached cell reads as distance 0"
+    }
+  ]
+}

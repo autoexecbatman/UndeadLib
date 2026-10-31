@@ -1,0 +1,10 @@
+# CMake and vcpkg output
+build/
+vcpkg_installed/
+
+# Visual Studio state
+.vs/
+*.user
+
+# Context files are kept outside version control
+CLAUDE.md

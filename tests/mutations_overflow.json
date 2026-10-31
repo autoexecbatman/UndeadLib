@@ -1,0 +1,18 @@
+{
+  "cwd": "D:/repo/UndeadLib",
+  "test_command": ["powershell", "-NoProfile", "-File", "tests/run_suite.ps1", "Release", "*Uint32Max*:*DistanceOverflow*"],
+  "mutations": [
+    {
+      "file": "include/undead/DialSearch.h",
+      "original": "if (candidate >= DistanceMap::UNREACHED)",
+      "mutated": "if (candidate > DistanceMap::UNREACHED)",
+      "catches": "a distance of exactly UINT32_MAX is stored and reads as unreached"
+    },
+    {
+      "file": "src/undead_c.cpp",
+      "original": "return UNDEAD_ERROR_DISTANCE_OVERFLOW;",
+      "mutated": "return UNDEAD_ERROR_INTERNAL;",
+      "catches": "an overflow reports as a library defect"
+    }
+  ]
+}
