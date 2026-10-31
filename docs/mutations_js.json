@@ -1,0 +1,138 @@
+{
+  "cwd": "D:/repo/UndeadLib/docs",
+  "test_command": ["powershell", "-NoProfile", "-Command", "$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'; python -m pytest -q -p no:cacheprovider tests/test_api_page_js.py; exit $LASTEXITCODE"],
+  "mutations": [
+    {
+      "file": "api_page_js.py",
+      "original": "            if depth == 0:\n                return text[1:index].strip(), text[index + 1 :].strip()",
+      "mutated": "            if depth == 1:\n                return text[1:index].strip(), text[index + 1 :].strip()",
+      "catches": "a nested brace closes the type early"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "            raise ValueError(f\"unknown JSDoc tag {tag}\")",
+      "mutated": "            pass",
+      "catches": "an unknown tag is rendered instead of refused"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "        if tag == \"@file\":\n            continue",
+      "mutated": "        if tag == \"@never\":\n            continue",
+      "catches": "@file is rendered as a field"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "        example = textwrap.dedent(\"\\n\".join(code)).strip(\"\\n\")",
+      "mutated": "        example = \"\\n\".join(code).strip(\"\\n\")",
+      "catches": "an example keeps the comment's indentation"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "        if is_in_code and not is_tag:",
+      "mutated": "        if is_in_code:",
+      "catches": "an example swallows the tags after it"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "text.strip().removeprefix(\"-\").strip()",
+      "mutated": "text.strip()",
+      "catches": "the dash between a parameter and its text is kept"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "            label = f\"{name}: {type_text}\" if type_text else name",
+      "mutated": "            label = name",
+      "catches": "a parameter's type is lost"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "            current = Field(type_text, rest)\n            add_field(parts, \"Returns\", current)",
+      "mutated": "            current = Field(\"\", rest)\n            add_field(parts, \"Returns\", current)",
+      "catches": "a return type is lost"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "            end = len(text) if end == -1 else end\n            blank(index, end)",
+      "mutated": "            end = len(text) if end == -1 else end",
+      "catches": "a brace in a line comment counts"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "                comments.append(_Comment(body, line))\n            blank(index, end)",
+      "mutated": "                comments.append(_Comment(body, line))",
+      "catches": "a brace in a block comment counts"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "            blank(index + 1, end)",
+      "mutated": "            blank(index, index)",
+      "catches": "a brace in a string counts"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "                end += 2 if text[end] == \"\\\\\" else 1",
+      "mutated": "                end += 1",
+      "catches": "an escaped quote ends the string"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "            line += body.count(\"\\n\")",
+      "mutated": "            line += 0",
+      "catches": "a comment is attached by its first line, not its last"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "            joined = joined.replace(\"( \", \"(\").replace(\", )\", \")\")",
+      "mutated": "            joined = joined.replace(\"( \", \"(\")",
+      "catches": "a multi-line signature keeps its trailing comma"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "            if code.endswith(\";\")",
+      "mutated": "            if False",
+      "catches": "a one-line const loses its value"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "        elif method_match.group(1):",
+      "mutated": "        elif False:",
+      "catches": "a static method is labelled a method"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "    raise ValueError(f\"{where}: unrecognised export form: {code}\")",
+      "mutated": "    return _Declaration(\"\", \"const\", \"\", index)",
+      "catches": "an unknown export form is skipped silently"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "        elif class_name is not None and depth_before == 1 and code != \"}\":",
+      "mutated": "        elif class_name is not None and depth_before >= 1 and code != \"}\":",
+      "catches": "method bodies are read as members"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "            if depth == 0:\n                class_name = None",
+      "mutated": "            if False:\n                class_name = None",
+      "catches": "a class never closes, so later code reads as its members"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "        if \"#\" not in found.name:",
+      "mutated": "        if True:",
+      "catches": "private members are listed"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "        raw = docs.get(index)",
+      "mutated": "        raw = docs.get(index + 1)",
+      "catches": "a comment is attached to the wrong declaration"
+    },
+    {
+      "file": "api_page_js.py",
+      "original": "    overview = parse_jsdoc_comment(first) if first and is_file_block else None",
+      "mutated": "    overview = parse_jsdoc_comment(first) if first else None",
+      "catches": "the first export's comment is taken as the overview"
+    }
+  ]
+}

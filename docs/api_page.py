@@ -1,8 +1,9 @@
 """Render UndeadLib's public API into one self-contained HTML page.
 
-Headers are read with libclang and the Python binding with ast; nothing is
-imported or executed. The page is also a coverage gate: a listed declaration
-with no comment, or a file with no opening block, fails the run.
+Headers are read with libclang, the Python binding with ast, and the
+JavaScript binding by api_page_js; nothing is imported or executed. The
+page is also a coverage gate: a listed declaration with no comment, or a
+file with no opening block, fails the run.
 
 Usage, from the repository root:
 
@@ -27,10 +28,20 @@ import os
 import re
 import sys
 import textwrap
-from dataclasses import dataclass
 from pathlib import Path
 
 import clang.cindex as cindex
+
+import api_page_js
+from api_model import (
+    DocBlock,
+    DocPart,
+    Entry,
+    Field,
+    SourceFile,
+    add_field,
+    comment_lines,
+)
 
 # The page's stylesheet and script, inlined so the page stands alone.
 STYLE = Path(__file__).parent / "api_page.css"
@@ -77,99 +88,6 @@ _FUNCTION_KINDS = {
 _TRAILING_QUALIFIERS = {"const", "noexcept", "override", "final", "&", "&&"}
 
 
-@dataclass
-class Field:
-    """One named item in a doc block: a parameter, an exception, a value."""
-
-    name: str
-    text: str
-
-
-@dataclass
-class DocPart:
-    """One section of a doc block, rendered in order.
-
-    kind is "text" (prose), "code" (an example) or "fields" (a titled list).
-    """
-
-    kind: str
-    title: str
-    text: str
-    fields: list[Field]
-
-
-@dataclass
-class DocBlock:
-    """A parsed comment or docstring, as the parts it is rendered from."""
-
-    parts: list[DocPart]
-
-
-@dataclass
-class Entry:
-    """One listed declaration and what documents it."""
-
-    name: str
-    kind: str
-    signature: str
-    line: int
-    doc: DocBlock | None
-    members: list[Field]
-
-
-@dataclass
-class SourceFile:
-    """One header or module: its overview and its listed declarations."""
-
-    section: str
-    path: str
-    overview: DocBlock | None
-    entries: list[Entry]
-
-
-def _add_field(parts: list[DocPart], title: str, item: Field) -> None:
-    """Append item to the fields part titled title, starting one if needed.
-
-    Example:
-        parts: list[DocPart] = []
-        _add_field(parts, "Parameters", Field("width", "Cells per row."))
-        _add_field(parts, "Parameters", Field("height", "Rows."))
-        len(parts)  # -> 1, both fields under one heading
-
-    """
-    if parts and parts[-1].kind == "fields" and parts[-1].title == title:
-        parts[-1].fields.append(item)
-        return
-    parts.append(DocPart("fields", title, "", [item]))
-
-
-def _comment_lines(raw: str) -> list[str]:
-    r"""Return a /** */ comment's lines without the delimiters and stars.
-
-    Example:
-        _comment_lines("/**\n * @brief A.\n *   code\n */")
-        # -> ['@brief A.', '  code']
-
-    """
-    body = raw.strip().removeprefix("/**").removesuffix("*/")
-    lines = []
-    for line in body.splitlines():
-        stripped = line.lstrip()
-        # One star and one space are the comment's frame; the rest is content.
-        if stripped.startswith("*"):
-            content = stripped[1:]
-            content = content.removeprefix(" ")
-        else:
-            content = stripped
-        lines.append(content.rstrip())
-    # Blank first and last lines are what the delimiters sat on.
-    while lines and not lines[0].strip():
-        lines.pop(0)
-    while lines and not lines[-1].strip():
-        lines.pop()
-    return lines
-
-
 def parse_doxygen_comment(raw: str) -> DocBlock:
     """Parse a /** */ comment's prose, @code blocks and tags into parts.
 
@@ -194,7 +112,7 @@ def parse_doxygen_comment(raw: str) -> DocBlock:
             parts.append(DocPart("text", "", " ".join(prose), []))
             prose.clear()
 
-    for line in _comment_lines(raw):
+    for line in comment_lines(raw):
         stripped = line.strip()
         # Inside @code every line is kept as written until @endcode.
         if is_in_code:
@@ -227,18 +145,18 @@ def parse_doxygen_comment(raw: str) -> DocBlock:
             flush_prose()
             name, _, text = rest.partition(" ")
             current = Field(name, text.strip())
-            _add_field(parts, "Parameters", current)
+            add_field(parts, "Parameters", current)
             continue
         if tag in ("@returns", "@return"):
             flush_prose()
             current = Field("", rest)
-            _add_field(parts, "Returns", current)
+            add_field(parts, "Returns", current)
             continue
         if tag in ("@throws", "@throw"):
             flush_prose()
             name, _, text = rest.partition(" ")
             current = Field(name, text.strip())
-            _add_field(parts, "Throws", current)
+            add_field(parts, "Throws", current)
             continue
         # An untagged line continues the open tag, or else the paragraph.
         if current is not None:
@@ -321,10 +239,10 @@ def parse_google_docstring(text: str) -> DocBlock:
                 parts.append(DocPart("code", "", block.strip("\n"), []))
             elif title == "Returns":
                 returned = " ".join(block.split())
-                _add_field(parts, "Returns", Field("", returned))
+                add_field(parts, "Returns", Field("", returned))
             else:
                 for item in _section_fields(block.splitlines()):
-                    _add_field(parts, title, item)
+                    add_field(parts, title, item)
             index = end
             continue
         # An indented run outside any section is a usage example.
@@ -971,12 +889,12 @@ def undocumented(files: list[SourceFile]) -> list[str]:
 
 
 def collect_all(root: Path) -> list[SourceFile]:
-    """Collect the C API, the C++ core and the Python binding under root.
+    """Collect the C API, the C++ core and both bindings under root.
 
     Example:
         [source.path for source in collect_all(root)]
         # -> ['include/undead/undead.h', 'include/undead/DialSearch.h', ...,
-        #     'bindings/python/undead/__init__.py']
+        #     'bindings/python/undead/__init__.py', 'bindings/js/undead.mjs']
 
     """
     include = root / "include" / "undead"
@@ -987,6 +905,8 @@ def collect_all(root: Path) -> list[SourceFile]:
             files.append(collect_header(header, root, CPP_SECTION, False))
     binding = root / "bindings" / "python" / "undead" / "__init__.py"
     files.append(collect_python_module(binding, root))
+    js_binding = root / "bindings" / "js" / "undead.mjs"
+    files.append(api_page_js.collect_js_module(js_binding, root))
     return files
 
 
@@ -1126,7 +1046,12 @@ def render_page(files: list[SourceFile], style: str, script: str) -> str:
         # -> '<!doctype html>'
 
     """
-    sections = [C_API_SECTION, CPP_SECTION, PYTHON_SECTION]
+    sections = [
+        C_API_SECTION,
+        CPP_SECTION,
+        PYTHON_SECTION,
+        api_page_js.JS_SECTION,
+    ]
     body = [_render_sidebar(files, sections), "<main><h1>UndeadLib API</h1>"]
     for section in sections:
         body.append(

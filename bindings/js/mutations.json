@@ -1,0 +1,120 @@
+{
+  "cwd": "D:/repo/UndeadLib",
+  "test_command": ["C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/ctest.exe", "--test-dir", "build-wasm", "-R", "js_binding"],
+  "mutations": [
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\tif (!Number.isInteger(value) || value < 0 || value > SIZE_MAX) {",
+      "mutated": "\tif (!Number.isInteger(value) || value > SIZE_MAX) {",
+      "catches": "a negative size or source reaches wasm and wraps"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\tif (!Number.isInteger(value) || value < 0 || value > SIZE_MAX) {",
+      "mutated": "\tif (!Number.isInteger(value) || value < 0) {",
+      "catches": "a value beyond 2^32 - 1 reaches wasm and wraps"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\tif (!Number.isInteger(value) || value < 0 || value > SIZE_MAX) {",
+      "mutated": "\tif (value < 0 || value > SIZE_MAX) {",
+      "catches": "a fraction reaches wasm and is truncated"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\trequireSize(\"width\", width);",
+      "mutated": "",
+      "catches": "width is not checked"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\trequireSize(\"height\", height);",
+      "mutated": "",
+      "catches": "height is not checked"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\t\trequireSize(\"source\", source);",
+      "mutated": "",
+      "catches": "sources are not checked"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\tif (!(stepCosts instanceof Uint8Array)) {",
+      "mutated": "\t\tif (false) {",
+      "catches": "a plain array or wider typed array is accepted as costs"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\tif (stepCosts.length !== cellCount) {",
+      "mutated": "\t\tif (stepCosts.length < cellCount) {",
+      "catches": "costs longer than the grid are accepted"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\tif (stepCosts.length !== cellCount) {",
+      "mutated": "\t\tif (stepCosts.length > cellCount) {",
+      "catches": "costs shorter than the grid are accepted and C reads past them"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\tif (!Number.isInteger(connectivity) || connectivity < -(2 ** 31) || connectivity >= 2 ** 31) {",
+      "mutated": "\t\tif (!Number.isInteger(connectivity) || connectivity < -(2 ** 31)) {",
+      "catches": "a connectivity above int32 wraps to a valid one"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\t\twasm.HEAPU32.set(sources, sourcesPointer / 4);",
+      "mutated": "\t\t\twasm.HEAPU32.set(sources, sourcesPointer);",
+      "catches": "sources are written at a byte offset read as a word offset"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\t\tif (status !== 0) {",
+      "mutated": "\t\t\tif (status > 3) {",
+      "catches": "low non-zero statuses are read as success"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\"UNDEAD_OK\",\n",
+      "mutated": "",
+      "catches": "status names are shifted one code off"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "Array.from(distances, (distance) => (distance === UNREACHED ? null : distance));",
+      "mutated": "Array.from(distances);",
+      "catches": "unreached cells come back as 4294967295, not null"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "distancesPointer / 4 + cellCount);",
+      "mutated": "distancesPointer / 4 + cellCount - 1);",
+      "catches": "the last cell is dropped"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\treturn new UndeadLibrary(await createModule());",
+      "mutated": "\t\treturn new UndeadLibrary(createModule);",
+      "catches": "load returns a library over the factory, not an instance"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\t\twasm._free(distancesPointer);",
+      "mutated": "",
+      "catches": "the distances buffer leaks"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\t\twasm._free(sourcesPointer);",
+      "mutated": "",
+      "catches": "the sources buffer leaks"
+    },
+    {
+      "file": "bindings/js/undead.mjs",
+      "original": "\t\t\twasm._free(costsPointer);",
+      "mutated": "",
+      "catches": "the costs buffer leaks"
+    }
+  ]
+}

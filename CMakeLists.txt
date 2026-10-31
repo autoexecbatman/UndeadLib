@@ -33,6 +33,19 @@ add_library(undead_core INTERFACE)
 target_include_directories(undead_core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(undead_core INTERFACE cxx_std_20)
 
+# The dungeon demo: monsters chasing the player down a Dijkstra map.
+add_executable(dungeon_demo demo/dungeon_demo.cpp demo/DungeonDemo.h)
+target_link_libraries(dungeon_demo PRIVATE undead_core)
+undead_strict_warnings(dungeon_demo)
+
+if(EMSCRIPTEN)
+	# The WebAssembly build: the C API as an ES module, undead_wasm.mjs and
+	# undead_wasm.wasm, for the JavaScript binding. Configure it in its own
+	# folder with emcmake, as the JavaScript section of CLAUDE.md shows.
+	include(cmake/UndeadWasm.cmake)
+	return()
+endif()
+
 add_library(undead_c SHARED
 	src/undead_c.cpp
 	include/undead/undead.h
@@ -41,11 +54,6 @@ target_link_libraries(undead_c PRIVATE undead_core)
 target_include_directories(undead_c PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_definitions(undead_c PRIVATE UNDEAD_BUILDING_DLL)
 undead_strict_warnings(undead_c)
-
-# The dungeon demo: monsters chasing the player down a Dijkstra map.
-add_executable(dungeon_demo demo/dungeon_demo.cpp demo/DungeonDemo.h)
-target_link_libraries(dungeon_demo PRIVATE undead_core)
-undead_strict_warnings(dungeon_demo)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 

@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 
 import api_page
-from api_page import DocBlock, DocPart, Entry, Field, SourceFile
+from api_model import DocBlock, DocPart, Entry, Field, SourceFile
 
 ROOT = Path(__file__).resolve().parents[2]
 INCLUDE = ROOT / "include" / "undead"
@@ -422,6 +422,7 @@ def test_the_real_tree_is_fully_documented(
         "include/undead/DistanceMap.h",
         "include/undead/GridGraph.h",
         "bindings/python/undead/__init__.py",
+        "bindings/js/undead.mjs",
     ]
     assert api_page.undocumented(files) == []
 

@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 import api_page
-from api_page import SourceFile
+from api_model import SourceFile
 
 ROOT = Path(__file__).resolve().parents[2]
 INCLUDE = ROOT / "include" / "undead"
@@ -87,7 +87,7 @@ def all_files() -> list[SourceFile]:
     """Return everything collect_all finds under the repository root.
 
     Example:
-        all_files[-1].path  # -> 'bindings/python/undead/__init__.py'
+        all_files[-1].path  # -> 'bindings/js/undead.mjs'
 
     """
     return api_page.collect_all(ROOT)

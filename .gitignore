@@ -1,5 +1,6 @@
 # CMake and vcpkg output
 build/
+build-wasm/
 vcpkg_installed/
 
 # Python caches
