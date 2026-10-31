@@ -10,14 +10,17 @@
  * Usage, the game's corridor with a shut door at column 4:
  * @code
  *   const uint8_t costs[7] = { 1, 1, 1, 1, 2, 1, 1 };  // 0 would be a wall
- *   const undead_grid grid = { 7, 1, costs };            // width, height, costs
  *   const size_t sources[1] = { 0 };                     // flood from cell 0
  *   uint32_t distances[7];                               // one per cell
  *   int status = undead_dijkstra_map(
- *       &grid, UNDEAD_EIGHT_WAY, sources, 1, distances);
+ *       7, 1, costs,       // width, height, step costs
+ *       UNDEAD_EIGHT_WAY,  // diagonals allowed
+ *       sources, 1,        // the sources and how many
+ *       distances);        // filled on UNDEAD_OK
  *   // status == UNDEAD_OK, distances == { 0, 1, 2, 3, 5, 6, 7 }
  *   const size_t far[1] = { 7 };
- *   status = undead_dijkstra_map(&grid, UNDEAD_EIGHT_WAY, far, 1, distances);
+ *   status = undead_dijkstra_map(
+ *       7, 1, costs, UNDEAD_EIGHT_WAY, far, 1, distances);
  *   // status == UNDEAD_ERROR_SOURCE_OUT_OF_RANGE, distances unchanged
  * @endcode
  */
@@ -50,7 +53,7 @@ extern "C"
 		UNDEAD_OK = 0,
 		/** A required pointer was NULL. */
 		UNDEAD_ERROR_NULL_ARGUMENT = 1,
-		/** width * height overflows, or does not match the array. */
+		/** width * height does not fit in size_t. */
 		UNDEAD_ERROR_GRID_SIZE = 2,
 		/** A source index is not a cell of the grid. */
 		UNDEAD_ERROR_SOURCE_OUT_OF_RANGE = 3,
@@ -72,29 +75,22 @@ extern "C"
 	};
 
 	/**
-	 * A grid of step costs. step_costs holds width * height entries; 0 is a
-	 * wall, 1 to 255 is the cost of stepping onto the cell. Not copied.
-	 */
-	typedef struct undead_grid
-	{
-		size_t width;
-		size_t height;
-		const uint8_t* step_costs;
-	} undead_grid;
-
-	/**
 	 * Fills distances with the cheapest cost from the nearest source to every
 	 * cell, or UNDEAD_UNREACHED where none reaches. A source is at distance 0
 	 * whatever its own cost.
 	 *
-	 * grid: required. step_costs may be NULL only when width * height is 0.
+	 * width, height: the grid's size in cells.
+	 * step_costs: width * height entries, read only; 0 is a wall, 1 to 255
+	 * the cost of stepping onto the cell. NULL only when width * height is 0.
 	 * connectivity: UNDEAD_FOUR_WAY or UNDEAD_EIGHT_WAY.
 	 * sources: source_count cell indices; NULL only when source_count is 0.
 	 * distances: width * height entries, written only on UNDEAD_OK; NULL only
 	 * when width * height is 0.
 	 */
 	UNDEAD_API int undead_dijkstra_map(
-		const undead_grid* grid,
+		size_t width,
+		size_t height,
+		const uint8_t* step_costs,
 		int connectivity,
 		const size_t* sources,
 		size_t source_count,

@@ -13,25 +13,26 @@
 #include "undead/undead.h"
 
 int undead_dijkstra_map(
-	const undead_grid* grid,
+	size_t width,
+	size_t height,
+	const uint8_t* step_costs,
 	int connectivity,
 	const size_t* sources,
 	size_t source_count,
 	uint32_t* distances)
 {
 	// Pointer and enum checks the C++ core has no counterpart for.
-	if (grid == nullptr || (sources == nullptr && source_count != 0))
+	if (sources == nullptr && source_count != 0)
 	{
 		return UNDEAD_ERROR_NULL_ARGUMENT;
 	}
 	const std::optional<size_t> cellCount =
-		undead::GridGraph::cell_count(grid->width, grid->height);
+		undead::GridGraph::cell_count(width, height);
 	if (!cellCount)
 	{
 		return UNDEAD_ERROR_GRID_SIZE;
 	}
-	if (*cellCount != 0 &&
-		(grid->step_costs == nullptr || distances == nullptr))
+	if (*cellCount != 0 && (step_costs == nullptr || distances == nullptr))
 	{
 		return UNDEAD_ERROR_NULL_ARGUMENT;
 	}
@@ -43,9 +44,9 @@ int undead_dijkstra_map(
 	try
 	{
 		const undead::GridGraph graph{
-			grid->width,
-			grid->height,
-			std::span<const uint8_t>{ grid->step_costs, *cellCount },
+			width,
+			height,
+			std::span<const uint8_t>{ step_costs, *cellCount },
 			connectivity == UNDEAD_EIGHT_WAY ? undead::Connectivity::EIGHT :
 											   undead::Connectivity::FOUR,
 		};

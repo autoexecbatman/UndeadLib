@@ -130,7 +130,7 @@
     },
     {
       "file": "src/undead_c.cpp",
-      "original": "(grid->step_costs == nullptr || distances == nullptr)",
+      "original": "(step_costs == nullptr || distances == nullptr)",
       "mutated": "(distances == nullptr)",
       "catches": "a NULL cost array on a non-empty grid is read"
     },

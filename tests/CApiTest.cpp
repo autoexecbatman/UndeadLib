@@ -43,12 +43,13 @@ TEST(CApi, CallFromCFloodsTheDoorCorridor)
 TEST(CApi, UnreachedCellHoldsTheSentinel)
 {
 	const std::vector<uint8_t> costs{ 1, 0, 1 };
-	const undead_grid grid{ 3, 1, costs.data() };
 	const std::vector<size_t> sources{ 0 };
 	std::vector<uint32_t> distances(3, UNTOUCHED);
 	EXPECT_EQ(
 		undead_dijkstra_map(
-			&grid,
+			3,
+			1,
+			costs.data(),
 			UNDEAD_FOUR_WAY,
 			sources.data(),
 			1,
@@ -76,14 +77,15 @@ TEST(CApi, MatchesBellmanFordOnRandomGrids)
 		}
 		std::uniform_int_distribution<size_t> cell{ 0, width * height - 1 };
 		const std::vector<size_t> sources{ cell(random), cell(random) };
-		const undead_grid grid{ width, height, costs.data() };
 
 		for (const bool eightWay : { false, true })
 		{
 			std::vector<uint32_t> distances(width * height, UNTOUCHED);
 			EXPECT_EQ(
 				undead_dijkstra_map(
-					&grid,
+					width,
+					height,
+					costs.data(),
 					eightWay ? UNDEAD_EIGHT_WAY : UNDEAD_FOUR_WAY,
 					sources.data(),
 					sources.size(),
@@ -102,20 +104,27 @@ TEST(CApi, MatchesBellmanFordOnRandomGrids)
 
 TEST(CApi, EmptyGridAcceptsNullArrays)
 {
-	const undead_grid grid{ 0, 4, nullptr };
 	EXPECT_EQ(
-		undead_dijkstra_map(&grid, UNDEAD_FOUR_WAY, nullptr, 0, nullptr),
+		undead_dijkstra_map(
+			0,
+			4,
+			nullptr,
+			UNDEAD_FOUR_WAY,
+			nullptr,
+			0,
+			nullptr),
 		UNDEAD_OK);
 }
 
 TEST(CApi, NoSourcesAcceptsANullSourceArray)
 {
 	const std::vector<uint8_t> costs(2, 1);
-	const undead_grid grid{ 2, 1, costs.data() };
 	std::vector<uint32_t> distances(2, UNTOUCHED);
 	EXPECT_EQ(
 		undead_dijkstra_map(
-			&grid,
+			2,
+			1,
+			costs.data(),
 			UNDEAD_FOUR_WAY,
 			nullptr,
 			0,
@@ -125,29 +134,15 @@ TEST(CApi, NoSourcesAcceptsANullSourceArray)
 	EXPECT_EQ(distances, expected);
 }
 
-TEST(CApi, NullGridIsRefused)
-{
-	const std::vector<size_t> sources{ 0 };
-	std::vector<uint32_t> distances(1, UNTOUCHED);
-	EXPECT_EQ(
-		undead_dijkstra_map(
-			nullptr,
-			UNDEAD_FOUR_WAY,
-			sources.data(),
-			1,
-			distances.data()),
-		UNDEAD_ERROR_NULL_ARGUMENT);
-	EXPECT_EQ(distances[0], UNTOUCHED);
-}
-
 TEST(CApi, NullStepCostsOnANonEmptyGridIsRefused)
 {
-	const undead_grid grid{ 2, 1, nullptr };
 	const std::vector<size_t> sources{ 0 };
 	std::vector<uint32_t> distances(2, UNTOUCHED);
 	EXPECT_EQ(
 		undead_dijkstra_map(
-			&grid,
+			2,
+			1,
+			nullptr,
 			UNDEAD_FOUR_WAY,
 			sources.data(),
 			1,
@@ -159,21 +154,28 @@ TEST(CApi, NullStepCostsOnANonEmptyGridIsRefused)
 TEST(CApi, NullDistancesOnANonEmptyGridIsRefused)
 {
 	const std::vector<uint8_t> costs(2, 1);
-	const undead_grid grid{ 2, 1, costs.data() };
 	const std::vector<size_t> sources{ 0 };
 	EXPECT_EQ(
-		undead_dijkstra_map(&grid, UNDEAD_FOUR_WAY, sources.data(), 1, nullptr),
+		undead_dijkstra_map(
+			2,
+			1,
+			costs.data(),
+			UNDEAD_FOUR_WAY,
+			sources.data(),
+			1,
+			nullptr),
 		UNDEAD_ERROR_NULL_ARGUMENT);
 }
 
 TEST(CApi, NullSourcesWithACountIsRefused)
 {
 	const std::vector<uint8_t> costs(2, 1);
-	const undead_grid grid{ 2, 1, costs.data() };
 	std::vector<uint32_t> distances(2, UNTOUCHED);
 	EXPECT_EQ(
 		undead_dijkstra_map(
-			&grid,
+			2,
+			1,
+			costs.data(),
 			UNDEAD_FOUR_WAY,
 			nullptr,
 			1,
@@ -187,12 +189,13 @@ TEST(CApi, OverflowingGridSizeIsRefused)
 	// 2^63 * 2 wraps to 0, which an unchecked product would read as empty.
 	const std::vector<uint8_t> costs(2, 1);
 	const size_t halfOfSizeRange = std::numeric_limits<size_t>::max() / 2 + 1;
-	const undead_grid grid{ halfOfSizeRange, 2, costs.data() };
 	const std::vector<size_t> sources{ 0 };
 	std::vector<uint32_t> distances(2, UNTOUCHED);
 	EXPECT_EQ(
 		undead_dijkstra_map(
-			&grid,
+			halfOfSizeRange,
+			2,
+			costs.data(),
 			UNDEAD_FOUR_WAY,
 			sources.data(),
 			1,
@@ -204,12 +207,13 @@ TEST(CApi, OverflowingGridSizeIsRefused)
 TEST(CApi, SourceOutsideTheGridIsRefused)
 {
 	const std::vector<uint8_t> costs(7, 1);
-	const undead_grid grid{ 7, 1, costs.data() };
 	const std::vector<size_t> sources{ 7 };
 	std::vector<uint32_t> distances(7, UNTOUCHED);
 	EXPECT_EQ(
 		undead_dijkstra_map(
-			&grid,
+			7,
+			1,
+			costs.data(),
 			UNDEAD_EIGHT_WAY,
 			sources.data(),
 			1,
@@ -221,11 +225,17 @@ TEST(CApi, SourceOutsideTheGridIsRefused)
 TEST(CApi, UnknownConnectivityIsRefused)
 {
 	const std::vector<uint8_t> costs(2, 1);
-	const undead_grid grid{ 2, 1, costs.data() };
 	const std::vector<size_t> sources{ 0 };
 	std::vector<uint32_t> distances(2, UNTOUCHED);
 	EXPECT_EQ(
-		undead_dijkstra_map(&grid, 6, sources.data(), 1, distances.data()),
+		undead_dijkstra_map(
+			2,
+			1,
+			costs.data(),
+			6,
+			sources.data(),
+			1,
+			distances.data()),
 		UNDEAD_ERROR_CONNECTIVITY);
 	EXPECT_EQ(distances, std::vector<uint32_t>(2, UNTOUCHED));
 }
@@ -236,12 +246,13 @@ TEST(CApi, DistanceOverflowIsRefused)
 	// the first to reach UINT32_MAX (4294967295).
 	const size_t width = 16843010;
 	const std::vector<uint8_t> costs(width, 255);
-	const undead_grid grid{ width, 1, costs.data() };
 	const std::vector<size_t> sources{ 0 };
 	std::vector<uint32_t> distances(width, UNTOUCHED);
 	EXPECT_EQ(
 		undead_dijkstra_map(
-			&grid,
+			width,
+			1,
+			costs.data(),
 			UNDEAD_FOUR_WAY,
 			sources.data(),
 			1,
