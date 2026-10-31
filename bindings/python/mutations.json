@@ -1,0 +1,90 @@
+{
+  "cwd": "D:/repo/UndeadLib",
+  "test_command": ["C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/ctest.exe", "--test-dir", "build", "-C", "Release", "-R", "python_binding"],
+  "mutations": [
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "        if not _is_size_t(width):",
+      "mutated": "        if not _is_size_t(abs(width)):",
+      "catches": "a negative width reaches ctypes and wraps"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "        if not _is_size_t(height):",
+      "mutated": "        if not _is_size_t(abs(height)):",
+      "catches": "a negative height reaches ctypes and wraps"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "    return 0 <= value <= _SIZE_MAX",
+      "mutated": "    return value <= _SIZE_MAX",
+      "catches": "negative values count as size_t"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "    return 0 <= value <= _SIZE_MAX",
+      "mutated": "    return 0 <= value",
+      "catches": "values beyond SIZE_MAX count as size_t and wrap"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "        if cost_view.format != \"B\":",
+      "mutated": "        if cost_view.format not in (\"B\", \"H\"):",
+      "catches": "uint16 costs are accepted and read as bytes"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "        if not cost_view.c_contiguous:",
+      "mutated": "        if not cost_view.contiguous:",
+      "catches": "a transposed (column-major) grid is accepted"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "        if cost_view.nbytes != cell_count:",
+      "mutated": "        if cost_view.nbytes < cell_count:",
+      "catches": "a cost buffer longer than the grid is accepted"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "            if not _is_size_t(source):",
+      "mutated": "            if source < 0:",
+      "catches": "a source beyond SIZE_MAX wraps to a real cell"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "            int(connectivity),",
+      "mutated": "            int(Connectivity.FOUR_WAY),",
+      "catches": "eight-way is ignored"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "        _raise_for_status(status)",
+      "mutated": "        del status",
+      "catches": "a C refusal is returned as distances instead of raised"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "            None if distance == _UNREACHED else distance",
+      "mutated": "            distance",
+      "catches": "an unreached cell reads as 4294967295"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "    _ERROR_CONNECTIVITY: (ValueError, \"UNDEAD_ERROR_CONNECTIVITY\"),",
+      "mutated": "    _ERROR_CONNECTIVITY: (RuntimeError, \"UNDEAD_ERROR_CONNECTIVITY\"),",
+      "catches": "a refused connectivity raises the defect exception"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "        IndexError,\n        \"UNDEAD_ERROR_SOURCE_OUT_OF_RANGE\",",
+      "mutated": "        RuntimeError,\n        \"UNDEAD_ERROR_SOURCE_OUT_OF_RANGE\",",
+      "catches": "C's source refusal raises the defect exception"
+    },
+    {
+      "file": "bindings/python/undead/__init__.py",
+      "original": "        OverflowError,\n        \"UNDEAD_ERROR_DISTANCE_OVERFLOW\",",
+      "mutated": "        RuntimeError,\n        \"UNDEAD_ERROR_DISTANCE_OVERFLOW\",",
+      "catches": "an overflow raises the defect exception"
+    }
+  ]
+}

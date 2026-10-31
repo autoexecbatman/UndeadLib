@@ -1,0 +1,18 @@
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+# preview is what makes PLW1514 run at all; without it the selection is inert.
+preview = true
+select = ["PLW1514", "E", "W", "D", "I", "N", "UP"]
+# Each contradicts another enabled docstring rule.
+ignore = ["D203", "D213"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+files = ["undead", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

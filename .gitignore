@@ -2,6 +2,12 @@
 build/
 vcpkg_installed/
 
+# Python caches
+__pycache__/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
 # Visual Studio state
 .vs/
 *.user

@@ -46,4 +46,17 @@ option(UNDEAD_BUILD_TESTS "Build the UndeadLib test executable" ON)
 if(UNDEAD_BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(tests)
+
+	# The Python binding's suite, against the undead_c this build produced.
+	# Plugin autoload is off: the suite needs none, and a broken third-party
+	# plugin then cannot stop it loading.
+	find_package(Python3 REQUIRED COMPONENTS Interpreter)
+	add_test(
+		NAME python_binding
+		COMMAND ${Python3_EXECUTABLE} -m pytest -q -p no:cacheprovider
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bindings/python
+	)
+	set_tests_properties(python_binding PROPERTIES
+		ENVIRONMENT "UNDEAD_C_DLL=$<TARGET_FILE:undead_c>;PYTEST_DISABLE_PLUGIN_AUTOLOAD=1"
+	)
 endif()
