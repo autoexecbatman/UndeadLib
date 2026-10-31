@@ -9,6 +9,9 @@
  *   c_caller_door_corridor(distances);  // -> UNDEAD_OK, { 0, 1, 2, 3, 5, 6, 7 }
  */
 #include "undead/undead.h"
+/* Included twice on purpose: a C compiler that does not honour #pragma once
+   fails here on the redefined struct and enum constants. */
+#include "undead/undead.h"
 
 /* Floods C++RogueLike's corridor, with a shut door at column 4, from cell 0. */
 int c_caller_door_corridor(uint32_t* distances)

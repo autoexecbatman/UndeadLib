@@ -21,8 +21,7 @@
  *   // status == UNDEAD_ERROR_SOURCE_OUT_OF_RANGE, distances unchanged
  * @endcode
  */
-#ifndef UNDEAD_H
-#define UNDEAD_H
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -103,6 +102,4 @@ extern "C"
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif
