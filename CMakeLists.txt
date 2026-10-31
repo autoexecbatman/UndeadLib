@@ -42,6 +42,11 @@ target_include_directories(undead_c PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_definitions(undead_c PRIVATE UNDEAD_BUILDING_DLL)
 undead_strict_warnings(undead_c)
 
+# The dungeon demo: monsters chasing the player down a Dijkstra map.
+add_executable(dungeon_demo demo/dungeon_demo.cpp demo/DungeonDemo.h)
+target_link_libraries(dungeon_demo PRIVATE undead_core)
+undead_strict_warnings(dungeon_demo)
+
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 # The API documentation: build/docs/api.html, from the headers and the Python
@@ -78,6 +83,9 @@ if(UNDEAD_BUILD_TESTS)
 			${CMAKE_CURRENT_SOURCE_DIR}/docs/api_page.py
 			--root ${CMAKE_CURRENT_SOURCE_DIR} --check
 	)
+
+	# The demo runs to the end: every monster beside the player, exit 0.
+	add_test(NAME dungeon_demo_runs COMMAND dungeon_demo)
 
 	# The Python binding's suite, against the undead_c this build produced.
 	add_test(

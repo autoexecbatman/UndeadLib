@@ -1,0 +1,90 @@
+{
+  "cwd": "D:/repo/UndeadLib",
+  "test_command": ["powershell", "-NoProfile", "-File", "tests/run_suite.ps1", "Debug", "DungeonDemo.*"],
+  "mutations": [
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "else if (column != dungeon.width)",
+      "mutated": "else if (column > dungeon.width)",
+      "catches": "a row shorter than the first is accepted"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "\t\t\t\tif (player)\n",
+      "mutated": "\t\t\t\tif (false)\n",
+      "catches": "a second player replaces the first"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "dungeon.stepCosts.push_back(DOOR_COST);",
+      "mutated": "dungeon.stepCosts.push_back(FLOOR_COST);",
+      "catches": "a door costs what floor does"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "\t\tif (column != 0)\n",
+      "mutated": "\t\tif (false)\n",
+      "catches": "a last row without a newline is dropped silently"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "\t\tif (!player)\n",
+      "mutated": "\t\tif (false)\n",
+      "catches": "a map with no player is accepted"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "\t\tstd::ranges::sort(dungeon.monsters);",
+      "mutated": "\t\tstatic_cast<void>(0);",
+      "catches": "monsters move in list order, not reading order"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "const bool isTaken = next == dungeon.player ||",
+      "mutated": "const bool isTaken = false ||",
+      "catches": "a monster steps onto the player"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "std::ranges::find(dungeon.monsters, next) !=\n\t\t\t\t\t\tdungeon.monsters.end();",
+      "mutated": "std::ranges::find(dungeon.monsters, next) ==\n\t\t\t\t\t\tdungeon.monsters.end() && false;",
+      "catches": "two monsters stack on one cell"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "if (!bestDistance || *distance < *bestDistance)",
+      "mutated": "if (!bestDistance || *distance <= *bestDistance)",
+      "catches": "a tie goes to the last neighbour, not the first"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "if (bestCell && here && *bestDistance < *here)",
+      "mutated": "if (bestCell && here && *bestDistance <= *here)",
+      "catches": "a monster sidesteps to a cell no nearer"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "return rowGap <= 1 && columnGap <= 1;",
+      "mutated": "return rowGap <= 1 || columnGap <= 1;",
+      "catches": "a monster on the player's row counts as beside it"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "\t\t\tif (turn < maxTurns)\n",
+      "mutated": "\t\t\tif (true)\n",
+      "catches": "the run plays one turn past its limit"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "for (size_t turn = 0; turn <= maxTurns; ++turn)",
+      "mutated": "for (size_t turn = 0; turn < maxTurns; ++turn)",
+      "catches": "the last turn is never shown or checked"
+    },
+    {
+      "file": "demo/DungeonDemo.h",
+      "original": "undead::Connectivity::EIGHT,",
+      "mutated": "undead::Connectivity::FOUR,",
+      "catches": "monsters cannot step diagonally"
+    }
+  ]
+}
